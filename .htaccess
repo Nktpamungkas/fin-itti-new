@@ -1,0 +1,41 @@
+RewriteEngine On
+
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteCond %{SCRIPT_FILENAME} !-f
+
+RewriteRule ^login$ ./login.php [L]
+RewriteRule ^login$ ./index.php [L]
+RewriteRule ^lockscreen$ ./lockscreen.php [L]
+RewriteRule ^logout$ ./login.php?act=logout [L]
+RewriteRule ^Home$ ./index1.php?p=Home [L]
+RewriteRule ^Blank$ ./index1.php?p=Blank [L]
+RewriteRule ^StatusMesin$ ./index1.php?p=Status-Mesin [L]
+RewriteRule ^LineNews$ ./index1.php?p=Line-News [L]
+RewriteRule ^BelahCuci$ ./index1.php?p=Belah-Cuci [L]
+RewriteRule ^FormBelahCuci$ ./index1.php?p=Form-Belah-Cuci [L]
+RewriteRule ^AntrianKartuKerja$ ./index1.php?p=Antrian-Kartu-Kerja [L]
+RewriteRule ^FormAntrianKartuKerja$ ./index1.php?p=Form-Antrian-Kartu-Kerja [L]
+RewriteRule ^SusunanKartuKerja$ ./index1.php?p=Susunan-Kartu-Kerja [L]
+RewriteRule ^Schedule$ ./index1.php?p=Schedule [L]
+RewriteRule ^LapSchedule$ ./index1.php?p=Lap-Schedule [L]
+RewriteRule ^FormSchedule$ ./index1.php?p=Form-Schedule [L]
+RewriteRule ^FormSchedule-$ ./index1.php?p=Form-Schedule [L]
+RewriteRule ^FormSchedule-([a-zA-Z0-9_-]+)$ ./index1.php?p=Form-Schedule&nodemand=$1 [L]
+RewriteRule ^FormScheduleNoKK$ ./index1.php?p=Form-Schedule-NoKK [L]
+RewriteRule ^FormScheduleNoKK-$ ./index1.php?p=Form-Schedule-NoKK [L]
+RewriteRule ^FormScheduleNoKK-([a-zA-Z0-9_-]+)$ ./index1.php?p=Form-Schedule-NoKK&nokk=$1 [L]
+RewriteRule ^SimpanNews$ ./index1.php?p=Simpan_News [L]
+RewriteRule ^TambahGerobak$ ./index1.php?p=Tambah_Gerobak [L]
+RewriteRule ^EditStatusMesin$ ./index1.php?p=Status_Mesin_Edit [L]
+RewriteRule ^EditSchedule$ ./index1.php?p=Edit_Schedule [L]
+RewriteRule ^EditStatusMC$ ./index1.php?p=Edit_StatusMC [L]
+RewriteRule ^EditNews$ ./index1.php?p=Edit_News [L]
+RewriteRule ^EditMesinMulai$ ./index1.php?p=Edit_Mesin_Mulai [L]
+RewriteRule ^EditMesinBerhenti$ ./index1.php?p=Edit_Mesin_Berhenti [L]
+RewriteRule ^HapusNews-([a-zA-Z0-9_-]+)$ ./index1.php?p=news_hapus&id=$1 [L]
+RewriteRule ^HapusSch-([a-zA-Z0-9_-]+)$ ./index1.php?p=sch_hapus&id=$1 [L] 
+RewriteRule ^HapusStsMc-([a-zA-Z0-9_-]+)$ ./index1.php?p=stsmc_hapus&id=$1 [L]
+RewriteRule ^DataNow$ ./index1.php?p=Data-Now [L]
+
+
+Options All -Indexes

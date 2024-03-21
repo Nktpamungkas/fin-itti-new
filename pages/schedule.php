@@ -189,9 +189,6 @@ $now = date("Y-m-d");
 										</table>
 									</div>
 									<!-- akhir table -->
-
-
-
 									<div class="carousel-caption">
 										<?php $hal = $i + 1;
 										echo "Halaman " . $hal . "/" . $rG['jumlah']; ?>
@@ -359,7 +356,6 @@ $now = date("Y-m-d");
 										<div class="modal fade modal-super-scaled" id="PrintHalaman<?php echo $rowd['id']; ?>">
 											<div class="modal-dialog modal-sm">
 												<div class="modal-content">
-
 													<div class="modal-header">
 														<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 															<span aria-hidden="true">&times;</span></button>
@@ -420,12 +416,12 @@ $now = date("Y-m-d");
 																														} else {
 																															echo " btn-warning mesin_mulai_edit ";
 																														} ?>">
-                  <?php if ($rCEk['status'] == "sedang jalan") {
-											echo "stop";
-										} else {
-											echo "mulai";
-										} ?>
-                </a>-->
+                  							<?php if ($rCEk['status'] == "sedang jalan") {
+												echo "stop";
+											} else {
+												echo "mulai";
+											} ?>
+                									</a>-->
 											</td>
 											<td>
 												<font size="-1"><?php echo $rowd['langganan'] . "/" . $rowd['buyer']; ?></font>
@@ -460,9 +456,23 @@ $now = date("Y-m-d");
 												<font size="-1"><?php echo $rowd['bruto']; ?></font>
 											</td>
 											<td>
-												<font size="-1"><?php echo $rowd['proses']; ?></font><br><?php if ($rowcek > 0) {
-																											echo "<span class='label label-danger'>Sudah Jalan</span><br><span class='label label-danger'>" . $rCEks['tgl_buat'] . "</span><br><span class='label label-danger'>" . $rCEks['no_mesin'] . "</span>";
-																										} ?>
+												<font size="-1"><?php echo $rowd['proses']; ?></font>
+												<br>
+												<?php 
+													if ($rowcek > 0) {
+														echo 	"<span class='label label-danger'>
+																	Sudah Jalan
+																</span>
+																<br>
+																<span class='label label-danger'>
+																	$rCEks[tgl_buat]
+																</span>
+																<br>
+																<span class='label label-danger'>
+																	$rCEks[no_mesin]
+																</span>";
+													} 
+												?>
 											</td>
 											<td align="center">
 												<font size="-1"><?php echo $rowd['tgl_delivery']; ?></font>

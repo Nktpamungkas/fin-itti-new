@@ -146,121 +146,139 @@
 	}
 </script>
 <?php
-	ini_set("error_reporting", 1);
-	session_start();
-	include("koneksi.php");
-	function nourut(){
-		include("koneksi.php");
-		$format = date("ymd");
-		$sql	= mysqli_query($con,"SELECT nokk FROM tbl_schedule WHERE substr(nokk,1,6) like '%".$format."%' ORDER BY nokk DESC LIMIT 1 ") or die (mysqli_error());
-		$d		= mysqli_num_rows($sql);
-		if($d>0){
-			$r=mysqli_fetch_array($sql);
-			$d=$r['nokk'];
-			$str=substr($d,6,2);
-			$Urut = (int)$str;
-		}else{
-			$Urut = 0;
-		}
-		$Urut = $Urut + 1;
-		$Nol="";
-		$nilai=2-strlen($Urut);
-		for ($i=1;$i<=$nilai;$i++){
-			$Nol= $Nol."0";
-		}
-		$nipbr = $format.$Nol.$Urut;
-		return $nipbr;
+	if (isset($_GET['nodemand'])) {
+		// $cek_data_mesin_selanjutnya		= mysqli_query($con, "SELECT * FROM `tbl_schedule` WHERE nodemand = '$_GET[nodemand]' AND NOT `status` = 'selesai' AND NOT catatan = 'data diinput dari finishing'");
+		// $hasildata_mesin_selanjutnya	= mysqli_fetch_assoc($cek_data_mesin_selanjutnya);
+		
+		// if($hasildata_mesin_selanjutnya){
+		// 	echo "<script>swal({
+		// 			title: 'Tidak bisa input Kartu Kerja, kartu kerja masih dalam Proses',
+		// 			text: ' Klik OK untuk Input No Urut kembali',
+		// 			type: 'warning',
+		// 			}).then((result) => {
+		// 			if (result.value) {
+		// 				window.location.href='FormSchedule'; 
+		// 			}
+		// 			});</script>";
+		// }else{
+			ini_set("error_reporting", 1);
+			session_start();
+			include("koneksi.php");
+			function nourut()
+			{
+				include("koneksi.php");
+				$format = date("ymd");
+				$sql	= mysqli_query($con, "SELECT nokk FROM tbl_schedule WHERE substr(nokk,1,6) like '%" . $format . "%' ORDER BY nokk DESC LIMIT 1 ") or die(mysqli_error());
+				$d		= mysqli_num_rows($sql);
+				if ($d > 0) {
+					$r = mysqli_fetch_array($sql);
+					$d = $r['nokk'];
+					$str = substr($d, 6, 2);
+					$Urut = (int)$str;
+				} else {
+					$Urut = 0;
+				}
+				$Urut = $Urut + 1;
+				$Nol = "";
+				$nilai = 2 - strlen($Urut);
+				for ($i = 1; $i <= $nilai; $i++) {
+					$Nol = $Nol . "0";
+				}
+				$nipbr = $format . $Nol . $Urut;
+				return $nipbr;
+			}
+			$nou	= nourut();
+			$nodemand	= $_GET['nodemand'];
+			$operation	= $_GET['operation'];
+			$sql_ITXVIEWKK  = db2_exec($conn1, "SELECT
+														TRIM(PRODUCTIONORDERCODE) AS PRODUCTIONORDERCODE,
+														TRIM(DEAMAND) AS DEMAND,
+														ORIGDLVSALORDERLINEORDERLINE,
+														PROJECTCODE,
+														ORDPRNCUSTOMERSUPPLIERCODE,
+														TRIM(SUBCODE01) AS SUBCODE01, TRIM(SUBCODE02) AS SUBCODE02, TRIM(SUBCODE03) AS SUBCODE03, TRIM(SUBCODE04) AS SUBCODE04,
+														TRIM(SUBCODE05) AS SUBCODE05, TRIM(SUBCODE06) AS SUBCODE06, TRIM(SUBCODE07) AS SUBCODE07, TRIM(SUBCODE08) AS SUBCODE08,
+														TRIM(SUBCODE09) AS SUBCODE09, TRIM(SUBCODE10) AS SUBCODE10, 
+														TRIM(ITEMTYPEAFICODE) AS ITEMTYPEAFICODE,
+														TRIM(DSUBCODE05) AS NO_WARNA,
+														TRIM(DSUBCODE02) || '-' || TRIM(DSUBCODE03)  AS NO_HANGER,
+														TRIM(ITEMDESCRIPTION) AS ITEMDESCRIPTION,
+														DELIVERYDATE
+													FROM 
+														ITXVIEWKK 
+													WHERE 
+														DEAMAND = '$nodemand'");
+			$dt_ITXVIEWKK	= db2_fetch_assoc($sql_ITXVIEWKK);
+
+			$sql_pelanggan_buyer 	= db2_exec($conn1, "SELECT TRIM(LANGGANAN) AS PELANGGAN, TRIM(BUYER) AS BUYER FROM ITXVIEW_PELANGGAN 
+															WHERE ORDPRNCUSTOMERSUPPLIERCODE = '$dt_ITXVIEWKK[ORDPRNCUSTOMERSUPPLIERCODE]' AND CODE = '$dt_ITXVIEWKK[PROJECTCODE]'");
+			$dt_pelanggan_buyer		= db2_fetch_assoc($sql_pelanggan_buyer);
+
+			$sql_po			= db2_exec($conn1, "SELECT TRIM(EXTERNALREFERENCE) AS NO_PO FROM ITXVIEW_KGBRUTO 
+													WHERE PROJECTCODE = '$dt_ITXVIEWKK[PROJECTCODE]' AND ORIGDLVSALORDERLINEORDERLINE = '$dt_ITXVIEWKK[ORIGDLVSALORDERLINEORDERLINE]'");
+			$dt_po    		= db2_fetch_assoc($sql_po);
+
+			$sql_noitem     = db2_exec($conn1, "SELECT * FROM ORDERITEMORDERPARTNERLINK WHERE ORDPRNCUSTOMERSUPPLIERCODE = '$dt_ITXVIEWKK[ORDPRNCUSTOMERSUPPLIERCODE]' 
+													AND SUBCODE01 = '$dt_ITXVIEWKK[SUBCODE01]' AND SUBCODE02 = '$dt_ITXVIEWKK[SUBCODE02]' 
+													AND SUBCODE03 = '$dt_ITXVIEWKK[SUBCODE03]' AND SUBCODE04 = '$dt_ITXVIEWKK[SUBCODE04]' 
+													AND SUBCODE05 = '$dt_ITXVIEWKK[SUBCODE05]' AND SUBCODE06 = '$dt_ITXVIEWKK[SUBCODE06]'
+													AND SUBCODE07 = '$dt_ITXVIEWKK[SUBCODE07]' AND SUBCODE08 ='$dt_ITXVIEWKK[SUBCODE08]'
+													AND SUBCODE09 = '$dt_ITXVIEWKK[SUBCODE09]' AND SUBCODE10 ='$dt_ITXVIEWKK[SUBCODE10]'");
+			$dt_item        = db2_fetch_assoc($sql_noitem);
+
+			$sql_lebargramasi	= db2_exec($conn1, "SELECT i.LEBAR,
+															CASE
+																WHEN i2.GRAMASI_KFF IS NULL THEN i2.GRAMASI_FKF
+																ELSE i2.GRAMASI_KFF
+															END AS GRAMASI 
+															FROM 
+																ITXVIEWLEBAR i 
+															LEFT JOIN ITXVIEWGRAMASI i2 ON i2.SALESORDERCODE = '$dt_ITXVIEWKK[PROJECTCODE]' AND i2.ORDERLINE = '$dt_ITXVIEWKK[ORIGDLVSALORDERLINEORDERLINE]'
+															WHERE 
+																i.SALESORDERCODE = '$dt_ITXVIEWKK[PROJECTCODE]' AND i.ORDERLINE = '$dt_ITXVIEWKK[ORIGDLVSALORDERLINEORDERLINE]'");
+			$dt_lg				= db2_fetch_assoc($sql_lebargramasi);
+
+			$sql_warna		= db2_exec($conn1, "SELECT DISTINCT TRIM(WARNA) AS WARNA FROM ITXVIEWCOLOR 
+												WHERE ITEMTYPECODE = '$dt_ITXVIEWKK[ITEMTYPEAFICODE]' 
+												AND SUBCODE01 = '$dt_ITXVIEWKK[SUBCODE01]' 
+												AND SUBCODE02 = '$dt_ITXVIEWKK[SUBCODE02]'
+												AND SUBCODE03 = '$dt_ITXVIEWKK[SUBCODE03]' 
+												AND SUBCODE04 = '$dt_ITXVIEWKK[SUBCODE04]'
+												AND SUBCODE05 = '$dt_ITXVIEWKK[SUBCODE05]' 
+												AND SUBCODE06 = '$dt_ITXVIEWKK[SUBCODE06]'
+												AND SUBCODE07 = '$dt_ITXVIEWKK[SUBCODE07]' 
+												AND SUBCODE08 = '$dt_ITXVIEWKK[SUBCODE08]'
+												AND SUBCODE09 = '$dt_ITXVIEWKK[SUBCODE09]' 
+												AND SUBCODE10 = '$dt_ITXVIEWKK[SUBCODE10]'");
+			$dt_warna		= db2_fetch_assoc($sql_warna);
+
+			$sql_qtyorder   = db2_exec($conn1, "SELECT DISTINCT
+														INITIALUSERPRIMARYQUANTITY AS QTY_ORDER,
+														USERSECONDARYQUANTITY AS QTY_ORDER_YARD,
+														CASE
+															WHEN TRIM(USERSECONDARYUOMCODE) = 'yd' THEN 'Yard'
+															WHEN TRIM(USERSECONDARYUOMCODE) = 'm' THEN 'Meter'
+															ELSE 'PCS'
+														END AS SATUAN_QTY
+													FROM 
+														ITXVIEW_RESERVATION 
+													WHERE 
+														PRODUCTIONORDERCODE = '$dt_ITXVIEWKK[PRODUCTIONORDERCODE]' AND ITEMTYPEAFICODE = 'RFD'");
+			$dt_qtyorder    = db2_fetch_assoc($sql_qtyorder);
+
+			$sql_roll		= db2_exec($conn1, "SELECT count(*) AS ROLL, s2.PRODUCTIONORDERCODE
+													FROM STOCKTRANSACTION s2 
+													WHERE s2.ITEMTYPECODE ='KGF' AND s2.PRODUCTIONORDERCODE = '$dt_ITXVIEWKK[PRODUCTIONORDERCODE]'
+													GROUP BY s2.PRODUCTIONORDERCODE");
+			$dt_roll   		= db2_fetch_assoc($sql_roll);
+
+			$sqlCek = mysqli_query($con, "SELECT * FROM tbl_schedule WHERE nokk='$nokk' ORDER BY id DESC LIMIT 1");
+			$cek = mysqli_num_rows($sqlCek);
+			$rcek = mysqli_fetch_array($sqlCek);
+			$sqlCek1 = mysqli_query($con, "SELECT * FROM tbl_schedule WHERE nokk='$nokk' AND not status='selesai' ORDER BY id DESC LIMIT 1");
+			$cek1 = mysqli_num_rows($sqlCek1);
+		// }
 	}
-	$nou	= nourut();
-	$nodemand	= $_GET['nodemand'];
-	$operation	= $_GET['operation'];
-	$sql_ITXVIEWKK  = db2_exec($conn1, "SELECT
-											TRIM(PRODUCTIONORDERCODE) AS PRODUCTIONORDERCODE,
-											TRIM(DEAMAND) AS DEMAND,
-											ORIGDLVSALORDERLINEORDERLINE,
-											PROJECTCODE,
-											ORDPRNCUSTOMERSUPPLIERCODE,
-											TRIM(SUBCODE01) AS SUBCODE01, TRIM(SUBCODE02) AS SUBCODE02, TRIM(SUBCODE03) AS SUBCODE03, TRIM(SUBCODE04) AS SUBCODE04,
-											TRIM(SUBCODE05) AS SUBCODE05, TRIM(SUBCODE06) AS SUBCODE06, TRIM(SUBCODE07) AS SUBCODE07, TRIM(SUBCODE08) AS SUBCODE08,
-											TRIM(SUBCODE09) AS SUBCODE09, TRIM(SUBCODE10) AS SUBCODE10, 
-											TRIM(ITEMTYPEAFICODE) AS ITEMTYPEAFICODE,
-											TRIM(DSUBCODE05) AS NO_WARNA,
-											TRIM(DSUBCODE02) || '-' || TRIM(DSUBCODE03)  AS NO_HANGER,
-											TRIM(ITEMDESCRIPTION) AS ITEMDESCRIPTION,
-											DELIVERYDATE
-										FROM 
-											ITXVIEWKK 
-										WHERE 
-											DEAMAND = '$nodemand'");
-	$dt_ITXVIEWKK	= db2_fetch_assoc($sql_ITXVIEWKK);
-
-	$sql_pelanggan_buyer 	= db2_exec($conn1, "SELECT TRIM(LANGGANAN) AS PELANGGAN, TRIM(BUYER) AS BUYER FROM ITXVIEW_PELANGGAN 
-												WHERE ORDPRNCUSTOMERSUPPLIERCODE = '$dt_ITXVIEWKK[ORDPRNCUSTOMERSUPPLIERCODE]' AND CODE = '$dt_ITXVIEWKK[PROJECTCODE]'");
-	$dt_pelanggan_buyer		= db2_fetch_assoc($sql_pelanggan_buyer);
-
-	$sql_po			= db2_exec($conn1, "SELECT TRIM(EXTERNALREFERENCE) AS NO_PO FROM ITXVIEW_KGBRUTO 
-										WHERE PROJECTCODE = '$dt_ITXVIEWKK[PROJECTCODE]' AND ORIGDLVSALORDERLINEORDERLINE = '$dt_ITXVIEWKK[ORIGDLVSALORDERLINEORDERLINE]'");
-	$dt_po    		= db2_fetch_assoc($sql_po);
-
-	$sql_noitem     = db2_exec($conn1, "SELECT * FROM ORDERITEMORDERPARTNERLINK WHERE ORDPRNCUSTOMERSUPPLIERCODE = '$dt_ITXVIEWKK[ORDPRNCUSTOMERSUPPLIERCODE]' 
-										AND SUBCODE01 = '$dt_ITXVIEWKK[SUBCODE01]' AND SUBCODE02 = '$dt_ITXVIEWKK[SUBCODE02]' 
-										AND SUBCODE03 = '$dt_ITXVIEWKK[SUBCODE03]' AND SUBCODE04 = '$dt_ITXVIEWKK[SUBCODE04]' 
-										AND SUBCODE05 = '$dt_ITXVIEWKK[SUBCODE05]' AND SUBCODE06 = '$dt_ITXVIEWKK[SUBCODE06]'
-										AND SUBCODE07 = '$dt_ITXVIEWKK[SUBCODE07]' AND SUBCODE08 ='$dt_ITXVIEWKK[SUBCODE08]'
-										AND SUBCODE09 = '$dt_ITXVIEWKK[SUBCODE09]' AND SUBCODE10 ='$dt_ITXVIEWKK[SUBCODE10]'");
-	$dt_item        = db2_fetch_assoc($sql_noitem);
-
-	$sql_lebargramasi	= db2_exec($conn1, "SELECT i.LEBAR,
-												CASE
-													WHEN i2.GRAMASI_KFF IS NULL THEN i2.GRAMASI_FKF
-													ELSE i2.GRAMASI_KFF
-												END AS GRAMASI 
-												FROM 
-													ITXVIEWLEBAR i 
-												LEFT JOIN ITXVIEWGRAMASI i2 ON i2.SALESORDERCODE = '$dt_ITXVIEWKK[PROJECTCODE]' AND i2.ORDERLINE = '$dt_ITXVIEWKK[ORIGDLVSALORDERLINEORDERLINE]'
-												WHERE 
-													i.SALESORDERCODE = '$dt_ITXVIEWKK[PROJECTCODE]' AND i.ORDERLINE = '$dt_ITXVIEWKK[ORIGDLVSALORDERLINEORDERLINE]'");
-	$dt_lg				= db2_fetch_assoc($sql_lebargramasi);
-
-	$sql_warna		= db2_exec($conn1, "SELECT DISTINCT TRIM(WARNA) AS WARNA FROM ITXVIEWCOLOR 
-									WHERE ITEMTYPECODE = '$dt_ITXVIEWKK[ITEMTYPEAFICODE]' 
-									AND SUBCODE01 = '$dt_ITXVIEWKK[SUBCODE01]' 
-									AND SUBCODE02 = '$dt_ITXVIEWKK[SUBCODE02]'
-									AND SUBCODE03 = '$dt_ITXVIEWKK[SUBCODE03]' 
-									AND SUBCODE04 = '$dt_ITXVIEWKK[SUBCODE04]'
-									AND SUBCODE05 = '$dt_ITXVIEWKK[SUBCODE05]' 
-									AND SUBCODE06 = '$dt_ITXVIEWKK[SUBCODE06]'
-									AND SUBCODE07 = '$dt_ITXVIEWKK[SUBCODE07]' 
-									AND SUBCODE08 = '$dt_ITXVIEWKK[SUBCODE08]'
-									AND SUBCODE09 = '$dt_ITXVIEWKK[SUBCODE09]' 
-									AND SUBCODE10 = '$dt_ITXVIEWKK[SUBCODE10]'");
-	$dt_warna		= db2_fetch_assoc($sql_warna);
-
-	$sql_qtyorder   = db2_exec($conn1, "SELECT DISTINCT
-											INITIALUSERPRIMARYQUANTITY AS QTY_ORDER,
-											USERSECONDARYQUANTITY AS QTY_ORDER_YARD,
-											CASE
-												WHEN TRIM(USERSECONDARYUOMCODE) = 'yd' THEN 'Yard'
-												WHEN TRIM(USERSECONDARYUOMCODE) = 'm' THEN 'Meter'
-												ELSE 'PCS'
-											END AS SATUAN_QTY
-										FROM 
-											ITXVIEW_RESERVATION 
-										WHERE 
-											PRODUCTIONORDERCODE = '$dt_ITXVIEWKK[PRODUCTIONORDERCODE]' AND ITEMTYPEAFICODE = 'RFD'");
-	$dt_qtyorder    = db2_fetch_assoc($sql_qtyorder);
-
-	$sql_roll		= db2_exec($conn1, "SELECT count(*) AS ROLL, s2.PRODUCTIONORDERCODE
-										FROM STOCKTRANSACTION s2 
-										WHERE s2.ITEMTYPECODE ='KGF' AND s2.PRODUCTIONORDERCODE = '$dt_ITXVIEWKK[PRODUCTIONORDERCODE]'
-										GROUP BY s2.PRODUCTIONORDERCODE");
-	$dt_roll   		= db2_fetch_assoc($sql_roll);
-
-	$sqlCek=mysqli_query($con,"SELECT * FROM tbl_schedule WHERE nokk='$nokk' ORDER BY id DESC LIMIT 1");
-	$cek=mysqli_num_rows($sqlCek);
-	$rcek=mysqli_fetch_array($sqlCek);
-	$sqlCek1=mysqli_query($con,"SELECT * FROM tbl_schedule WHERE nokk='$nokk' AND not status='selesai' ORDER BY id DESC LIMIT 1");
-	$cek1=mysqli_num_rows($sqlCek1);
 ?>
 <?php
 	$Kapasitas	= isset($_POST['kapasitas']) ? $_POST['kapasitas'] : '';
@@ -490,7 +508,7 @@
 				<div class="form-group">
 					<label for="no_urut" class="col-sm-3 control-label">No Urut</label>
 					<div class="col-sm-2">
-						<select name="no_urut" class="form-control select2" id="no_urut" required>
+						<select name="no_urut" class="form-control select2" id="no_urut" >
 							<option value="">Pilih</option>
 							<?php
 							$sqlKap = mysqli_query($con, "SELECT no_urut FROM tbl_urut ORDER BY no_urut ASC");
@@ -505,14 +523,13 @@
 				<div class="form-group">
 					<label for="g_shift" class="col-sm-3 control-label">Group Shift</label>
 					<div class="col-sm-2">
-						<select name="g_shift" class="form-control select2" required>
+						<select name="g_shift" class="form-control select2" >
 							<option value="">Pilih</option>
 							<option value="A">A</option>
 							<option value="B">B</option>
 							<option value="C">C</option>
 						</select>
 					</div>
-
 				</div>
 				<div class="form-group">
 					<label for="proses" class="col-sm-3 control-label">Proses</label>
@@ -520,19 +537,19 @@
 						<select name="proses" class="form-control" id="proses" onChange="cekpro(); cekpro1(); cekpro2(); aktif_staff();" required>
 							<!-- <option value="">Pilih</option>
 							<?php
-								$sqlKap = mysqli_query($con, "SELECT proses FROM tbl_proses ORDER BY proses ASC");
-								while ($rK = mysqli_fetch_array($sqlKap)) {
+							$sqlKap = mysqli_query($con, "SELECT proses FROM tbl_proses ORDER BY proses ASC");
+							while ($rK = mysqli_fetch_array($sqlKap)) {
 							?>
 								<option value="<?php echo $rK['proses']; ?>"><?php echo $rK['proses']; ?></option>
 							<?php } ?> -->
 							<option value="">Pilih</option>
-							<?php 
-								$qry1 = mysqli_query($con, "SELECT proses,jns FROM tbl_proses ORDER BY id ASC");
-								while ($r = mysqli_fetch_array($qry1)) {
+							<?php
+							$qry1 = mysqli_query($con, "SELECT proses,jns FROM tbl_proses ORDER BY id ASC");
+							while ($r = mysqli_fetch_array($qry1)) {
 							?>
 								<option value="<?php echo $r['proses'] . " (" . $r['jns'] . ")"; ?>" <?php if ($rw['proses'] == $r['proses'] . " (" . $r['jns'] . ")") {
-																								echo "SELECTED";
-																							} ?>><?php echo $r['proses'] . " (" . $r['jns'] . ")"; ?></option>
+																											echo "SELECTED";
+																										} ?>><?php echo $r['proses'] . " (" . $r['jns'] . ")"; ?></option>
 							<?php } ?>
 						</select>
 					</div>
@@ -578,24 +595,24 @@
 if ($_POST['save'] == "save") {
 	$qryCek = mysqli_query($con, "SELECT * from tbl_schedule WHERE `status`='sedang jalan' and  no_mesin='$_POST[no_mc]'");
 	$row = mysqli_num_rows($qryCek);
-	// $qryCekN = mysqli_query($con, "SELECT * from tbl_schedule WHERE nodemand='$_POST[nodemand]' and  no_mesin='$_POST[no_mc]' and proses='" . $_POST['proses'] . "' and DATE_FORMAT(tgl_update,'%Y-%m-%d')=DATE_FORMAT( now( ), '%Y-%m-%d' ) and `status`='selesai' and g_shift='$_POST[g_shift]'");
+
 	$qryCekN = mysqli_query($con, "SELECT * from tbl_schedule WHERE nodemand='$_POST[nodemand]' and  no_mesin='$_POST[no_mc]' and proses='" . $_POST['proses'] . "' and DATE_FORMAT(tgl_update,'%Y-%m-%d')=DATE_FORMAT( now( ), '%Y-%m-%d' ) and `status`='selesai'");
 	$rowN = mysqli_num_rows($qryCekN);
-	// $qryCekN1 = mysqli_query($con, "SELECT * from tbl_schedule WHERE no_urut='$_POST[no_urut]' and  no_mesin='$_POST[no_mc]' and proses='" . $_POST['proses'] . "' and DATE_FORMAT(tgl_update,'%Y-%m-%d')=DATE_FORMAT( now( ), '%Y-%m-%d' ) and `status`='selesai' and g_shift='$_POST[g_shift]'");
+
 	$qryCekN1 = mysqli_query($con, "SELECT * from tbl_schedule WHERE no_urut='$_POST[no_urut]' and  no_mesin='$_POST[no_mc]' and proses='" . $_POST['proses'] . "' and DATE_FORMAT(tgl_update,'%Y-%m-%d')=DATE_FORMAT( now( ), '%Y-%m-%d' ) and `status`='selesai'");
 	$rowN1 = mysqli_num_rows($qryCekN1);
-	// $qryCekN2 = mysqli_query($con, "SELECT * from tbl_schedule WHERE nodemand='" . $_POST['nodemand'] . "' and  proses='" . $_POST['proses'] . "' and tampil='1' and `status`='selesai' and g_shift='$_POST[g_shift]'");
-	// $qryCekN2 = mysqli_query($con, "SELECT * from tbl_schedule WHERE nodemand='" . $_POST['nodemand'] . "' and  proses='" . $_POST['proses'] . "' and tampil='1' and `status`='selesai'");
+
 	$qryCekN2 = mysqli_query($con, "SELECT * from tbl_schedule WHERE nodemand='" . $_POST['nodemand'] . "' and  proses='" . $_POST['proses'] . "' and `status`='selesai'");
 	$rowN2 = mysqli_num_rows($qryCekN2);
+
 	if ($row > 0 and $_POST['no_urut'] == "1") {
 		echo "<script> swal({
-            title: 'Tidak bisa input urutan ke-`1`, mesin masih jalan',
-            text: ' Klik OK untuk Input No Urut kembali',
-            type: 'warning'
-        }, function(){
-            window.location='';
-        });</script>";
+				title: 'Tidak bisa input urutan ke-`1`, mesin masih jalan',
+				text: ' Klik OK untuk Input No Urut kembali',
+				type: 'warning'
+			}, function(){
+				window.location='';
+			});</script>";
 	} else if ($rowN > 0) {
 		echo "<script> swal({
             title: 'Tidak bisa input, NoKK sudah di mesin ini dengan proses sama',
@@ -604,24 +621,7 @@ if ($_POST['save'] == "save") {
         }, function(){
             window.location='';
         });</script>";
-	} //else if ($rowN > 0) {
-		//echo "<script> swal({
-        //    title: 'Tidak bisa input, NoKK sudah di mesin ini dengan proses sama',
-        //    text: ' Klik OK untuk Input No Urut kembali',
-        //    type: 'warning'
-        //}, function(){
-        //    window.location='';
-        //});</script>";
-	//} else if ($rowN2 > 0) {
-	//	echo "<script> swal({
-    //        title: 'Tidak bisa simpan, NoKK sudah ada',
-    //        text: ' Klik OK untuk Input No Urut kembali',
-    //        type: 'warning'
-    //    }, function(){
-     //       window.location='';
-     //   });</script>";
-	//} 
-		else {
+	} else {
 		if ($_POST['nokk'] != "") {
 			$kartu = $_POST['nokk'];
 		} else {
@@ -634,52 +634,68 @@ if ($_POST['save'] == "save") {
 		$catatan = str_replace("'", "''", $_POST['catatan']);
 		$lot = trim($_POST['lot']);
 		$nomesin = str_replace("'", "''", $_POST['no_mc']);
-		$sqlData = mysqli_query($con, "INSERT INTO tbl_schedule SET
-			nokk='$kartu',
-			nodemand='$_POST[nodemand]',
-			langganan='$_POST[langganan]',
-			buyer='$_POST[buyer]',
-			no_order='$_POST[no_order]',
-			po='$po',
-			no_hanger='$_POST[no_hanger]',
-			no_item='$_POST[no_item]',
-			jenis_kain='$jns',
-			tgl_delivery='$_POST[tgl_delivery]',
-			lebar='$_POST[lebar]',
-			gramasi='$_POST[grms]',
-			warna='$warna',
-			no_warna='$nowarna',
-			qty_order='$_POST[qty1]',
-			pjng_order='$_POST[qty2]',
-			satuan_order='$_POST[satuan1]',
-			lot='$lot',
-			rol='$_POST[qty3]',
-			bruto='$_POST[qty4]',
-			shift='$_POST[shift]',
-			g_shift='$_POST[g_shift]',
-			no_mesin='$nomesin',
-			no_urut='$_POST[no_urut]',
-			proses='$_POST[proses]',
-			tgl_masuk=now(),
-			personil='$_POST[personil]',
-			catatan='$catatan',
-			tgl_update=now(),
-			sts_mc='1',
-			tampil='1'");
+
+		// $cek_data		= mysqli_query($con, "SELECT * FROM `tbl_schedule` WHERE nodemand = '$_POST[nodemand]' AND proses = '$_POST[proses]' AND NOT `status` = 'selesai' AND NOT catatan = 'data diinput dari finishing'");
+		// $hasilcekata	= mysqli_fetch_assoc($cek_data);
+
+		// if($hasilcekata){
+			echo "<script>swal({
+				title: 'GAGAL TERSIMPAN',   
+				text: 'Klik Ok untuk input data kembali',
+				type: 'Warning',
+				}).then((result) => {
+				if (result.value) {
+					window.location.href='Schedule'; 
+				}
+				});</script>";
+		// }else{
+			$sqlData = mysqli_query($con, "INSERT INTO tbl_schedule SET
+													nokk='$kartu',
+													nodemand='$_POST[nodemand]',
+													langganan='$_POST[langganan]',
+													buyer='$_POST[buyer]',
+													no_order='$_POST[no_order]',
+													po='$po',
+													no_hanger='$_POST[no_hanger]',
+													no_item='$_POST[no_item]',
+													jenis_kain='$jns',
+													tgl_delivery='$_POST[tgl_delivery]',
+													lebar='$_POST[lebar]',
+													gramasi='$_POST[grms]',
+													warna='$warna',
+													no_warna='$nowarna',
+													qty_order='$_POST[qty1]',
+													pjng_order='$_POST[qty2]',
+													satuan_order='$_POST[satuan1]',
+													lot='$lot',
+													rol='$_POST[qty3]',
+													bruto='$_POST[qty4]',
+													shift='$_POST[shift]',
+													g_shift='$_POST[g_shift]',
+													no_mesin='$nomesin',
+													no_urut='$_POST[no_urut]',
+													proses='$_POST[proses]',
+													tgl_masuk=now(),
+													personil='$_POST[personil]',
+													catatan='$catatan',
+													tgl_update=now(),
+													sts_mc='1',
+													tampil='1'");
+		// }
 
 		if ($sqlData) {
 			// echo "<script>alert('Data Tersimpan');</script>";
 			// echo "<script>window.location.href='?p=Input-Data-KJ;</script>";
 			echo "<script>swal({
-  title: 'Data Tersimpan',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-    
-	 window.location.href='Schedule'; 
-  }
-});</script>";
+				title: 'Data Tersimpan',   
+				text: 'Klik Ok untuk input data kembali',
+				type: 'success',
+				}).then((result) => {
+				if (result.value) {
+					
+					window.location.href='Schedule'; 
+				}
+				});</script>";
 		}
 	}
 }
@@ -710,15 +726,15 @@ if ($_POST['update'] == "update") {
 		// echo "<script>alert('Data Telah Diubah');</script>";
 		// echo "<script>window.location.href='?p=Input-Data-KJ;</script>";
 		echo "<script>swal({
-  title: 'Data Telah DiUbah',   
-  text: 'Klik Ok untuk input data kembali',
-  type: 'success',
-  }).then((result) => {
-  if (result.value) {
-    
-	 window.location.href='Schedule'; 
-  }
-});</script>";
+			title: 'Data Telah DiUbah',   
+			text: 'Klik Ok untuk input data kembali',
+			type: 'success',
+			}).then((result) => {
+			if (result.value) {
+				
+				window.location.href='Schedule'; 
+			}
+			});</script>";
 	}
 }
 ?>

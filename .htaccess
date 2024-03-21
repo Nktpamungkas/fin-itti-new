@@ -16,6 +16,7 @@ RewriteRule ^FormBelahCuci$ ./index1.php?p=Form-Belah-Cuci [L]
 RewriteRule ^AntrianKartuKerja$ ./index1.php?p=Antrian-Kartu-Kerja [L]
 RewriteRule ^FormAntrianKartuKerja$ ./index1.php?p=Form-Antrian-Kartu-Kerja [L]
 RewriteRule ^SusunanKartuKerja$ ./index1.php?p=Susunan-Kartu-Kerja [L]
+RewriteRule ^Masuk$ ./index1.php?p=Masuk [L]
 RewriteRule ^Schedule$ ./index1.php?p=Schedule [L]
 RewriteRule ^LapSchedule$ ./index1.php?p=Lap-Schedule [L]
 RewriteRule ^FormSchedule$ ./index1.php?p=Form-Schedule [L]
@@ -36,6 +37,12 @@ RewriteRule ^HapusNews-([a-zA-Z0-9_-]+)$ ./index1.php?p=news_hapus&id=$1 [L]
 RewriteRule ^HapusSch-([a-zA-Z0-9_-]+)$ ./index1.php?p=sch_hapus&id=$1 [L] 
 RewriteRule ^HapusStsMc-([a-zA-Z0-9_-]+)$ ./index1.php?p=stsmc_hapus&id=$1 [L]
 RewriteRule ^DataNow$ ./index1.php?p=Data-Now [L]
+
+RewriteRule ^FormMasuk$ ./index1.php?p=Form-Masuk [L]
+RewriteRule ^FormMasuk-$ ./index1.php?p=Form-Masuk [L]
+RewriteRule ^FormMasuk-([a-zA-Z0-9_-]+)$ ./index1.php?p=Form-Masuk&nodemand=$1 [L]
+
+
 
 
 Options All -Indexes
